@@ -1,5 +1,14 @@
 const express = require('express');
+var fs = require('fs');
 const Joi = require('joi');
+
+const http = require('http');
+const https = require('https');
+
+const privateKey  = fs.readFileSync('sslcert/server.key', 'utf8');
+const certificate = fs.readFileSync('sslcert/server.crt', 'utf8');
+
+const credentials = {key: privateKey, cert: certificate};
 
 // Create express application
 const app = express();
@@ -65,4 +74,11 @@ app.post('/api/users', (req, res) => {
 })
 
 const port = process.env.PORT || 3000;
-app.listen(port, () => {console.log(`Listening on port ${port} ...`)})
+const securePort = port + 443
+
+var httpServer = http.createServer(app);
+var httpsServer = https.createServer(credentials, app);
+
+httpServer.listen(port, () => {console.log(`Listening on port ${port} ...`)});
+httpsServer.listen(securePort, () => {console.log(`Listening on port ${securePort} ...`)});
+//app.listen(port, () => {console.log(`Listening on port ${port} ...`)})
