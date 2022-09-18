@@ -1,9 +1,9 @@
 const express = require('express');
-var fs = require('fs');
+const fs = require('fs');
 const Joi = require('joi');
-
 const http = require('http');
 const https = require('https');
+const ws = require('ws');
 
 const privateKey  = fs.readFileSync('sslcert/server.key', 'utf8');
 const certificate = fs.readFileSync('sslcert/server.crt', 'utf8');
@@ -73,12 +73,29 @@ app.post('/api/users', (req, res) => {
     res.send(user);
 })
 
+app.post('/api/call/:meetingId', (req, res) => {
+    meetingId = req.params.meetingId
+})
+
 const port = process.env.PORT || 3000;
 const securePort = port + 443
 
 var httpServer = http.createServer(app);
 var httpsServer = https.createServer(credentials, app);
 
+const wsServer = new ws.Server({ noServer: true });
+wsServer.on('connection', socket => {
+  socket.on('message', message => {
+    msg = JSON.parse(message);
+    console.log("WS got " + JSON.stringify(msg));
+  });
+});
+
 httpServer.listen(port, () => {console.log(`Listening on port ${port} ...`)});
 httpsServer.listen(securePort, () => {console.log(`Listening on port ${securePort} ...`)});
-//app.listen(port, () => {console.log(`Listening on port ${port} ...`)})
+
+httpServer.on('upgrade', (request, socket, head) => {
+  wsServer.handleUpgrade(request, socket, head, socket => {
+    wsServer.emit('connection', socket, request);
+  });
+});
