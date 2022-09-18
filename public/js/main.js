@@ -23,11 +23,10 @@ let version = 1;
 
 const signaling = new BroadcastChannel('webrtc');
 const wsOrigin = location.origin.replace(/^http/, 'ws');
-console.log("wsOrigin="+wsOrigin);
 const signaling2 = new WebSocket(wsOrigin);
-console.log("signaling2=" + wsOrigin)
+
 signaling2.onopen = e => {
-  signalEvent({type: 'msg', data: "signaling2 Sending Hi"});
+  console.log("WS connected to " + wsOrigin)  
 };
 
 signaling.onmessage = e => {
@@ -78,14 +77,12 @@ startButton.onclick = async () => {
   startButton.disabled = true;
   hangupButton.disabled = false;
 
-  //signaling.postMessage({type: 'ready'});
-  signalEvent({meetingID: meetingID, type: 'ready'})
+  signalEvent({head: {meetingID: meetingID}, body: {type: 'ready'}})
 };
 
 hangupButton.onclick = async () => {
   hangup();
-  //signaling.postMessage({type: 'bye'});
-  signalEvent({meetingID: meetingID, type: 'bye'})
+  signalEvent({head: {meetingID: meetingID}, body: {type: 'bye'}})
 };
 
 async function hangup() {
@@ -103,7 +100,6 @@ function createPeerConnection() {
   pc = new RTCPeerConnection();
   pc.onicecandidate = e => {
     const message = {
-      meetingID: meetingID,
       type: 'candidate',
       candidate: null,
     };
@@ -111,10 +107,8 @@ function createPeerConnection() {
       message.candidate = e.candidate.candidate;
       message.sdpMid = e.candidate.sdpMid;
       message.sdpMLineIndex = e.candidate.sdpMLineIndex;
-      message.meetingID = meetingID;
     }
-    //signaling.postMessage(message);
-    signalEvent(message);
+    signalEvent({head: {meetingID: meetingID}, body: message});
     console.log("New ICE candidate, SDP=" + JSON.stringify(message));
   };
   pc.ontrack = e => remoteVideo.srcObject = e.streams[0];
@@ -127,8 +121,7 @@ async function makeCall() {
   await createPeerConnection();
 
   const offer = await pc.createOffer();
-  //signaling.postMessage({type: 'offer', sdp: offer.sdp});
-  signalEvent({meetingID: meetingID, type: 'offer', sdp: offer.sdp});
+  signalEvent({head: {meetingID: meetingID}, body: {type: 'offer', sdp: offer.sdp}});
   await pc.setLocalDescription(offer);
 }
 
@@ -141,8 +134,7 @@ async function handleOffer(offer) {
   await pc.setRemoteDescription(offer);
 
   const answer = await pc.createAnswer();
-  //signaling.postMessage({type: 'answer', sdp: answer.sdp});
-  signalEvent({meetingID: meetingID, type: 'answer', sdp: answer.sdp});
+  signalEvent({head: {meetingID: meetingID}, body: {type: 'answer', sdp: answer.sdp}});
   console.log("ICE reply " + JSON.stringify(answer));
   await pc.setLocalDescription(answer);
 }
@@ -170,7 +162,7 @@ async function handleCandidate(candidate) {
 function signalEvent(message) {
   console.log("SENDING " + JSON.stringify(message))
   if (version === 1) {
-    signaling.postMessage(message);
+    signaling.postMessage(message.body);
     signaling2.send(JSON.stringify(message))
   }
   else 
