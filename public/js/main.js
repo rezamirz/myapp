@@ -18,31 +18,46 @@ const remoteVideo = document.getElementById('remoteVideo');
 
 let pc;
 let localStream;
-let meetingID;
-let version = 1;
+let meetingId;
+let version = 2;
+let signaling;
 
-const signaling = new BroadcastChannel('webrtc');
-const wsOrigin = location.origin.replace(/^http/, 'ws');
-const signaling2 = new WebSocket(wsOrigin);
+if (version === 1)
+  signaling = new BroadcastChannel('webrtc');
+else {
+  const wsOrigin = location.origin.replace(/^http/, 'ws');
+  signaling = new WebSocket(wsOrigin);
+  signaling.onopen = e => {
+    console.log("WS connected to " + wsOrigin) 
+  };
+}
+//const signaling2 = new WebSocket(wsOrigin);
 
-signaling2.onopen = e => {
+/*signaling2.onopen = e => {
   console.log("WS connected to " + wsOrigin)  
-};
+};*/
 
 signaling.onmessage = e => {
   if (!localStream) {
     console.log('not ready yet');
     return;
   }
-  switch (e.data.type) {
+
+  let msg;
+
+  if (version === 1)
+    msg = e.data;
+  else
+    msg = JSON.parse(e.data);
+  switch (msg.type) {
     case 'offer':
-      handleOffer(e.data);
+      handleOffer(msg);
       break;
     case 'answer':
-      handleAnswer(e.data);
+      handleAnswer(msg);
       break;
     case 'candidate':
-      handleCandidate(e.data);
+      handleCandidate(msg);
       break;
     case 'ready':
       // A second tab joined. This tab will initiate a call unless in a call already.
@@ -64,9 +79,9 @@ signaling.onmessage = e => {
 };
 
 startButton.onclick = async () => {
-  meetingID = document.getElementById('meetingID').value;
-  if (!meetingID) {
-    alert("Set meetingID")
+  meetingId = document.getElementById('meetingId').value;
+  if (!meetingId) {
+    alert("Set meetingId")
     return
   }
 
@@ -77,12 +92,12 @@ startButton.onclick = async () => {
   startButton.disabled = true;
   hangupButton.disabled = false;
 
-  signalEvent({head: {meetingID: meetingID}, body: {type: 'ready'}})
+  signalEvent({head: {meetingId: meetingId}, body: {type: 'ready'}})
 };
 
 hangupButton.onclick = async () => {
   hangup();
-  signalEvent({head: {meetingID: meetingID}, body: {type: 'bye'}})
+  signalEvent({head: {meetingId: meetingId}, body: {type: 'bye'}})
 };
 
 async function hangup() {
@@ -108,7 +123,7 @@ function createPeerConnection() {
       message.sdpMid = e.candidate.sdpMid;
       message.sdpMLineIndex = e.candidate.sdpMLineIndex;
     }
-    signalEvent({head: {meetingID: meetingID}, body: message});
+    signalEvent({head: {meetingId: meetingId}, body: message});
     console.log("New ICE candidate, SDP=" + JSON.stringify(message));
   };
   pc.ontrack = e => remoteVideo.srcObject = e.streams[0];
@@ -116,12 +131,11 @@ function createPeerConnection() {
 }
 
 async function makeCall() {
+  await createPeerConnection();
   console.log("makeCall " + JSON.stringify(pc));
 
-  await createPeerConnection();
-
   const offer = await pc.createOffer();
-  signalEvent({head: {meetingID: meetingID}, body: {type: 'offer', sdp: offer.sdp}});
+  signalEvent({head: {meetingId: meetingId}, body: {type: 'offer', sdp: offer.sdp}});
   await pc.setLocalDescription(offer);
 }
 
@@ -134,7 +148,7 @@ async function handleOffer(offer) {
   await pc.setRemoteDescription(offer);
 
   const answer = await pc.createAnswer();
-  signalEvent({head: {meetingID: meetingID}, body: {type: 'answer', sdp: answer.sdp}});
+  signalEvent({head: {meetingId: meetingId}, body: {type: 'answer', sdp: answer.sdp}});
   console.log("ICE reply " + JSON.stringify(answer));
   await pc.setLocalDescription(answer);
 }
@@ -163,8 +177,8 @@ function signalEvent(message) {
   console.log("SENDING " + JSON.stringify(message))
   if (version === 1) {
     signaling.postMessage(message.body);
-    signaling2.send(JSON.stringify(message))
+    //signaling2.send(JSON.stringify(message))
   }
   else 
-    signaling2.send(JSON.stringify(message))
+    signaling.send(JSON.stringify(message))
 }

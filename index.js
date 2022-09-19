@@ -26,6 +26,9 @@ const users = [
 
 lastId = 1;
 
+var clients = new Map();
+var meetings = new Map();
+
 // first argument is the route
 // the second is a callback function to handle the route
 app.get('/', (req, res) => {
@@ -84,12 +87,66 @@ var httpServer = http.createServer(app);
 var httpsServer = https.createServer(credentials, app);
 
 const wsServer = new ws.Server({ noServer: true });
-wsServer.on('connection', socket => {
-  socket.on('message', message => {
+wsServer.on('connection', wsSocket => {
+  wsSocket.id = uuidv4();
+  wsSocket.on('message', message => {
     msg = JSON.parse(message);
-    console.log("WS got " + JSON.stringify(msg));
+    if (!msg.head.meetingId) {
+        console.log("ERROR missing meetingId, ws=" + JSON.stringify(wsSocket));
+        return;
+    }
+
+    console.log("wsSocket.id " + wsSocket.id + " got " + JSON.stringify(msg));
+
+    meetingId = clients.get(wsSocket);
+    // If this is the first message coming from this client set the meeting ID for the client.
+    if (!meetingId) {
+        meetingId = msg.head.meetingId;
+        clients.set(wsSocket, meetingId);
+    } else if (meetingId != msg.head.meetingId) {
+        console.log("ERROR mismatch meetingId, exisitng meetingId=" + meetingId + ", new meetingId=" + msg.head.meetingId);
+        return;
+    }
+
+    meeting = addToMeeting(meetingId, wsSocket);
+    broadcastMessage(meeting, wsSocket, msg.body);
+
   });
 });
+
+function uuidv4() {
+  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+    var r = Math.random() * 16 | 0, v = c == 'x' ? r : (r & 0x3 | 0x8);
+    return v.toString(16);
+  });
+}
+
+function addToMeeting(meetingId, client) {
+    let meeting = meetings.get(meetingId);
+    if (!meeting) {
+        console.log("addToMeeting meetingId=" + meetingId + " not found");
+        meeting = [];
+    }
+
+    let c = meeting.find(c => c === client);
+    if (!c) {
+        meeting.push(client);
+        //console.log("Add ws.id " + client.id + " to the meeting ... len=" + meeting.length);
+    }
+    meetings.set(meetingId, meeting);
+    return meeting;
+}
+
+function broadcastMessage(meeting, wsSocket, msg) {
+    for (var i = 0; i < meeting.length; i++) {
+        if (meeting[i] && meeting[i] != wsSocket) {
+            try {
+                //console.log("broadcastMessage to " + meeting[i].id + ", wsSoket.id=" + wsSocket.id + ", msg=" + JSON.stringify(msg));
+                meeting[i].send(JSON.stringify(msg));
+            } catch(e) {}
+        }
+    }
+}
 
 httpServer.listen(port, () => {console.log(`Listening on port ${port} ...`)});
 httpsServer.listen(securePort, () => {console.log(`Listening on port ${securePort} ...`)});
