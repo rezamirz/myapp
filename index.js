@@ -92,7 +92,7 @@ wsServer.on('connection', wsSocket => {
   wsSocket.on('message', message => {
     msg = JSON.parse(message);
     if (!msg.head.meetingId) {
-        console.log("ERROR missing meetingId, ws=" + JSON.stringify(wsSocket));
+        console.log("ERROR missing meetingId, wsSocket=" + JSON.stringify(wsSocket));
         return;
     }
 
@@ -156,3 +156,10 @@ httpServer.on('upgrade', (request, socket, head) => {
     wsServer.emit('connection', socket, request);
   });
 });
+
+httpsServer.on('upgrade', (request, socket, head) => {
+    wsServer.handleUpgrade(request, socket, head, socket => {
+      wsServer.emit('connection', socket, request);
+    });
+});
+  

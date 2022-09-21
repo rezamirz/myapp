@@ -26,16 +26,12 @@ if (version === 1)
   signaling = new BroadcastChannel('webrtc');
 else {
   const wsOrigin = location.origin.replace(/^http/, 'ws');
-  signaling = new WebSocket(wsOrigin);
-  signaling.onopen = e => {
-    console.log("WS connected to " + wsOrigin) 
-  };
-}
-//const signaling2 = new WebSocket(wsOrigin);
+    signaling = new WebSocket(wsOrigin);
 
-/*signaling2.onopen = e => {
-  console.log("WS connected to " + wsOrigin)  
-};*/
+    signaling.onopen = e => {
+      console.log("WS connected to " + wsOrigin) 
+    }
+}
 
 signaling.onmessage = e => {
   if (!localStream) {
@@ -177,8 +173,7 @@ function signalEvent(message) {
   console.log("SENDING " + JSON.stringify(message))
   if (version === 1) {
     signaling.postMessage(message.body);
-    //signaling2.send(JSON.stringify(message))
-  }
-  else 
+  } else {
     signaling.send(JSON.stringify(message))
+  }
 }
