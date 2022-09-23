@@ -1,5 +1,7 @@
 const express = require('express');
-//const helmet = require("helmet");
+const meetings = require('./meetings')
+var meetingsMap = require('./meetings').meetingsMap;
+const helmet = require("helmet");
 
 // Get a debug logger for web socket
 const wsDebugger = require('debug')('mypeer:ws');
@@ -23,8 +25,12 @@ const app = express();
 
 // To enable parsing json objects in the app
 app.use(express.json());
+
+// To handle static pages
 app.use(express.static('public'));
-//app.use(helmet());
+app.use(helmet());
+
+app.use('/api/meetings', meetings);
 
 if (app.get('env') === 'development') {
     app.use(morgan('tiny'));
@@ -34,53 +40,10 @@ if (app.get('env') === 'development') {
 
 var clients = new Map();
 
-// Map of meetingId to the meeting
-// A meeting is an array of clients that joined together
-var meetings = new Map();
-
 // first argument is the route
 // the second is a callback function to handle the route
 app.get('/', (req, res) => {
-    res.send('Hello World\n');
-})
-
-// Get the info about all meetings
-app.get('/api/meetings', (req, res) => {
-    let result = [];
-    meetings.forEach((meeting, meetingId) => {
-        console.log("pushing meeting " + JSON.stringify(meeting));
-        result.push({meetingId: meetingId});
-    });
-
-    res.send(result);
-})
-
-// Get info about a single meeting
-app.get('/api/meetings/:meetingId', (req, res) => {
-    meeting = meetings.get(req.params.meetingId);
-    if (!meeting) { // HTTP 404
-        res.status(404).send('meeting not found');
-    }
-    res.send(meeting);
-})
-
-// Create a new meeting
-// info about the meeting is in the body of the request
-app.post('/api/meetings', (req, res) => {
-
-    const meeting = {
-        meetingId: uuidv4(),
-    };
-
-    meetings.set(meeting.meetingId, []);
-
-    // Send created user to the client
-    res.send(meeting);
-})
-
-// Join a meeting
-app.post('/api/meetings/:meetingId', (req, res) => {
-    meetingId = req.params.meetingId
+    res.send('Welcome to MyPeer\n');
 })
 
 const port = process.env.PORT || 3000;
@@ -125,7 +88,7 @@ function uuidv4() {
 }
 
 function addToMeeting(meetingId, client) {
-    let meeting = meetings.get(meetingId);
+    let meeting = meetingsMap.get(meetingId);
     if (!meeting) {
         console.log("addToMeeting meetingId=" + meetingId + " not found");
         meeting = [];
@@ -136,7 +99,7 @@ function addToMeeting(meetingId, client) {
         meeting.push(client);
         wsDebugger("Add ws.id " + client.id + " to the meeting ... len=" + meeting.length);
     }
-    meetings.set(meetingId, meeting);
+    meetingsMap.set(meetingId, meeting);
     return meeting;
 }
 
