@@ -1,4 +1,12 @@
 const express = require('express');
+//const helmet = require("helmet");
+
+// Get a debug logger for web socket
+const wsDebugger = require('debug')('mypeer:ws');
+
+// Middleware function to log HTTP requests
+const morgan = require('morgan');
+
 const fs = require('fs');
 const Joi = require('joi');
 const http = require('http');
@@ -15,18 +23,19 @@ const app = express();
 
 // To enable parsing json objects in the app
 app.use(express.json());
-app.use(express.static('public'))
+app.use(express.static('public'));
+//app.use(helmet());
 
-const users = [
-    {id: 1, username: 'reza', password: 'reza'},
-    {id: 2, username: 'serban', password: 'serban'},
-    {id: 3, username: 'lukas', password: 'likas'},
-    {id: 3, username: 'michelle', password: 'michelle'},
-];
+if (app.get('env') === 'development') {
+    app.use(morgan('tiny'));
+    console.log('Morgan enabled ...');
+}
 
-lastId = 1;
 
 var clients = new Map();
+
+// Map of meetingId to the meeting
+// A meeting is an array of clients that joined together
 var meetings = new Map();
 
 // first argument is the route
@@ -35,48 +44,42 @@ app.get('/', (req, res) => {
     res.send('Hello World\n');
 })
 
-app.get('/api/users', (req, res) => {
-    res.send(users)
-})
-
-// route to get a single user
-app.get('/api/users/:id', (req, res) => {
-    const user = users.find(c => c.id === parseInt(req.params.id));
-    if (!user) { // HTTP 404
-        res.status(404).send('user not found');
-    }
-    res.send(user);
-})
-
-// Create a user
-// info about the user is in the body of the request
-app.post('/api/users', (req, res) => {
-
-    // We can use joi for validation, define a joi schema for validation
-    const schema = Joi.object({
-        username: Joi.string().min(3).required()
+// Get the info about all meetings
+app.get('/api/meetings', (req, res) => {
+    let result = [];
+    meetings.forEach((meeting, meetingId) => {
+        console.log("pushing meeting " + JSON.stringify(meeting));
+        result.push({meetingId: meetingId});
     });
 
-    const result = schema.validate(req.body.username)
-    if (result.error) {
-        // 400 Bad request
-        res.status(400).send(result.error)
-        return
-    }
-
-    const user = {
-        id: lastId,
-        username: req.body.username,
-    };
-    lastId++
-
-    users.push(user);
-
-    // Send created user to the client
-    res.send(user);
+    res.send(result);
 })
 
-app.post('/api/call/:meetingId', (req, res) => {
+// Get info about a single meeting
+app.get('/api/meetings/:meetingId', (req, res) => {
+    meeting = meetings.get(req.params.meetingId);
+    if (!meeting) { // HTTP 404
+        res.status(404).send('meeting not found');
+    }
+    res.send(meeting);
+})
+
+// Create a new meeting
+// info about the meeting is in the body of the request
+app.post('/api/meetings', (req, res) => {
+
+    const meeting = {
+        meetingId: uuidv4(),
+    };
+
+    meetings.set(meeting.meetingId, []);
+
+    // Send created user to the client
+    res.send(meeting);
+})
+
+// Join a meeting
+app.post('/api/meetings/:meetingId', (req, res) => {
     meetingId = req.params.meetingId
 })
 
@@ -131,7 +134,7 @@ function addToMeeting(meetingId, client) {
     let c = meeting.find(c => c === client);
     if (!c) {
         meeting.push(client);
-        //console.log("Add ws.id " + client.id + " to the meeting ... len=" + meeting.length);
+        wsDebugger("Add ws.id " + client.id + " to the meeting ... len=" + meeting.length);
     }
     meetings.set(meetingId, meeting);
     return meeting;
@@ -141,7 +144,7 @@ function broadcastMessage(meeting, wsSocket, msg) {
     for (var i = 0; i < meeting.length; i++) {
         if (meeting[i] && meeting[i] != wsSocket) {
             try {
-                //console.log("broadcastMessage to " + meeting[i].id + ", wsSoket.id=" + wsSocket.id + ", msg=" + JSON.stringify(msg));
+                wsDebugger("broadcastMessage to " + meeting[i].id + ", wsSoket.id=" + wsSocket.id + ", msg=" + JSON.stringify(msg));
                 meeting[i].send(JSON.stringify(msg));
             } catch(e) {}
         }
