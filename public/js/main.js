@@ -14,6 +14,7 @@ hangupButton.disabled = true;
 
 const localVideo = document.getElementById('localVideo');
 const remoteVideo = document.getElementById('remoteVideo');
+const remoteAudio = document.getElementById('remoteAudio');
 
 
 let pc;
@@ -82,8 +83,9 @@ startButton.onclick = async () => {
   }
 
   localStream = await navigator.mediaDevices.getUserMedia({audio: true, video: true});
+  
+  localVideo.muted = true;
   localVideo.srcObject = localStream;
-
 
   startButton.disabled = true;
   hangupButton.disabled = false;
@@ -122,7 +124,10 @@ function createPeerConnection() {
     signalEvent({head: {meetingId: meetingId}, body: message});
     console.log("New ICE candidate, SDP=" + JSON.stringify(message));
   };
-  pc.ontrack = e => remoteVideo.srcObject = e.streams[0];
+  pc.ontrack = e => {
+    remoteVideo.srcObject = e.streams[0];
+    //remoteAudio.srcObject = e.streams[1];
+  }
   localStream.getTracks().forEach(track => pc.addTrack(track, localStream));
 }
 
