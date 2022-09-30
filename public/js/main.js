@@ -23,6 +23,14 @@ let meetingId;
 let version = 2;
 let signaling;
 
+const servers = {
+  iceServers: [
+    {
+      urls: ['stun:stun1.1.google.com:19302', 'stun:stun2.1.google.com:19302']
+    }
+  ]
+}
+
 if (version === 1)
   signaling = new BroadcastChannel('webrtc');
 else {
@@ -110,7 +118,7 @@ async function hangup() {
 };
 
 function createPeerConnection() {
-  pc = new RTCPeerConnection();
+  pc = new RTCPeerConnection(servers);
   pc.onicecandidate = e => {
     const message = {
       type: 'candidate',
