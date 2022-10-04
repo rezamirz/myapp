@@ -62,33 +62,12 @@ canvas {
   width: 100%;
 }
 
-div#links {
-  padding: 0.5em 0 0 0;
-}
-
 h1 {
   border-bottom: 1px solid #ccc;
   font-family: 'Roboto', sans-serif;
   font-weight: 500;
   margin: 0 0 0.8em 0;
   padding: 0 0 0.2em 0;
-}
-
-h2 {
-  color: #444;
-  font-weight: 500;
-}
-
-h3 {
-  border-top: 1px solid #eee;
-  color: #666;
-  font-weight: 500;
-  margin: 10px 0 10px 0;
-  white-space: nowrap;
-}
-
-li {
-  margin: 0 0 0.4em 0;
 }
 
 html {
@@ -142,25 +121,10 @@ select {
   top: -1px;
 }
 
-h1 span {
-  white-space: nowrap;
-}
-
 a {
   color: #1D6EEE;
   font-weight: 300;
   text-decoration: none;
-}
-
-h1 a {
-  font-weight: 300;
-  margin: 0 10px 0 0;
-  white-space: nowrap;
-}
-
-a:hover {
-  color: #3d85c6;
-  text-decoration: underline;
 }
 
 div#links a {
