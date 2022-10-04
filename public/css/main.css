@@ -190,13 +190,6 @@ a:hover {
   text-decoration: underline;
 }
 
-a#viewSource {
-  display: block;
-  margin: 1.3em 0 0 0;
-  border-top: 1px solid #999;
-  padding: 1em 0 0 0;
-}
-
 div#errorMsg p {
   color: #F00;
 }
@@ -272,6 +265,64 @@ ul {
 #bloc1, #bloc2
 {
     display:inline;
+}
+
+#controls{
+  position: fixed;
+  bottom: 20px;
+  left: 50%;
+  transform:translateX(-50%);
+  display: flex;
+  gap: 1em;
+}
+
+.control-container{
+  background-color: rgb(179, 102, 249, .9);
+  padding: 20px;
+  border-radius: 50%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  cursor: pointer;
+}
+
+.control-container img{
+  height: 30px;
+  width: 30px;
+}
+
+.center-box {
+  text-align: center;
+  left: 50%;
+  position: fixed;
+  transform:translateX(-50%);
+  display: flex;
+}
+
+.center-button {
+  display: grid;
+  justify-content: center;
+  align-items: center;
+}
+
+#leaveButton{
+  background-color: rgb(255,80,80, 1);
+}
+
+#videos{
+  display: grid;
+  grid-template-columns: 1fr;
+  width: 400px;
+  height: 800px;
+  overflow:hidden;
+  gap: 4px;
+}
+
+.video-player{
+  background-color: black;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
 }
 
 

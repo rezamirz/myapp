@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset='utf-8'>
+    <meta http-equiv='X-UA-Compatible' content='IE=edge'>
+    <title>PeerChat</title>
+    <meta name='viewport' content='width=device-width, initial-scale=1'>
+    <link rel='stylesheet' type='text/css' media='screen' href='css/main.css'>
+</head>
+<body>
+    <div id="container">
+        <div id="block_container">
+            <div id="bloc1">    
+                <form id="join-form">
+                    <label for="Meeting ID">Meeting ID:</label>
+                    <input id="meetingId" name="invite_code" required>
+                    <button id="startButton">Join a meeting</button>
+                </form>
+            </div>
+        </div>    
+    </div>
+</body>
+
+<script>
+    let form = document.getElementById('join-form')
+
+    form.addEventListener('submit', (e) => {
+        e.preventDefault()
+        let inviteCode = e.target.invite_code.value
+        window.location = `index.html?room=${inviteCode}` 
+    })
+</script>
+</html>

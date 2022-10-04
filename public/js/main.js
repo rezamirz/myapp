@@ -8,8 +8,16 @@
 
 'use strict';
 
+let queryString = window.location.search
+let urlParams = new URLSearchParams(queryString)
+let meetingId = urlParams.get('room')
+
+if(!meetingId){
+    window.location = 'lobby.html'
+}
+
 const startButton = document.getElementById('startButton');
-const hangupButton = document.getElementById('hangupButton');
+const hangupButton = document.getElementById('leaveButton');
 hangupButton.disabled = true;
 
 const localVideo = document.getElementById('localVideo');
@@ -19,7 +27,6 @@ const remoteAudio = document.getElementById('remoteAudio');
 
 let pc;
 let localStream;
-let meetingId;
 let version = 2;
 let signaling;
 
@@ -84,11 +91,11 @@ signaling.onmessage = e => {
 };
 
 startButton.onclick = async () => {
-  meetingId = document.getElementById('meetingId').value;
+  /*meetingId = document.getElementById('meetingId').value;
   if (!meetingId) {
     alert("Set meetingId")
     return
-  }
+  }*/
 
   localStream = await navigator.mediaDevices.getUserMedia({audio: true, video: true});
   
@@ -104,6 +111,7 @@ startButton.onclick = async () => {
 hangupButton.onclick = async () => {
   hangup();
   signalEvent({head: {meetingId: meetingId}, body: {type: 'bye'}})
+  window.location = "lobby.html"
 };
 
 async function hangup() {
