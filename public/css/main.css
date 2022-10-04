@@ -21,17 +21,6 @@
   font-weight: 400;
 }
 
-@media screen and (min-width: 1000px) {
-  /* hack! to detect non-touch devices */
-  div#links a {
-    line-height: 0.8em;
-  }
-}
-
-audio {
-  max-width: 100%;
-}
-
 body {
   font-family: 'Roboto', sans-serif;
   font-weight: 300;
@@ -73,17 +62,6 @@ canvas {
   width: 100%;
 }
 
-code {
-  font-family: 'Roboto', sans-serif;
-  font-weight: 400;
-}
-
-div#container {
-  margin: 0 auto 0 auto;
-  max-width: 60em;
-  padding: 1em 1.5em 1.3em 1.5em;
-}
-
 div#links {
   padding: 0.5em 0 0 0;
 }
@@ -122,11 +100,6 @@ html {
 img {
   border: none;
   max-width: 100%;
-}
-
-input[type=radio] {
-  position: relative;
-  top: -1px;
 }
 
 p {
@@ -190,10 +163,6 @@ a:hover {
   text-decoration: underline;
 }
 
-div#errorMsg p {
-  color: #F00;
-}
-
 div#links a {
   display: block;
   line-height: 1.3em;
@@ -204,67 +173,9 @@ div.outputSelector {
   margin: -1.3em 0 2em 0;
 }
 
-p.description {
-  margin: 0 0 0.5em 0;
-}
-
-strong {
-  font-weight: 500;
-}
-
 textarea {
   resize: none;
   font-family: 'Roboto', sans-serif;
-}
-
-video {
-  background: #222;
-  margin: 0 0 20px 0;
-  --width: 100%;
-  width: var(--width);
-  height: calc(var(--width) * 0.75);
-}
-
-ul {
-  margin: 0 0 0.5em 0;
-}
-
-@media screen and (max-width: 650px) {
-  .highlight {
-    font-size: 1em;
-    margin: 0 0 20px 0;
-    padding: 0.2em 1em;
-  }
-
-  h1 {
-    font-size: 24px;
-  }
-}
-
-@media screen and (max-width: 550px) {
-  button:active {
-    background-color: darkRed;
-  }
-
-  h1 {
-    font-size: 22px;
-  }
-}
-
-@media screen and (max-width: 450px) {
-  h1 {
-    font-size: 20px;
-  }
-}
-
-#block_container
-{
-    text-align:center;
-}
-
-#bloc1, #bloc2
-{
-    display:inline;
 }
 
 #controls{
@@ -313,7 +224,7 @@ ul {
   display: grid;
   grid-template-columns: 1fr;
   width: 400px;
-  height: 800px;
+  height: 700px;
   overflow:hidden;
   gap: 4px;
 }

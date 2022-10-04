@@ -19,10 +19,11 @@ if(!meetingId){
 const startButton = document.getElementById('startButton');
 const hangupButton = document.getElementById('leaveButton');
 hangupButton.disabled = true;
+const cameraButton = document.getElementById('cameraButton');
+const micButton = document.getElementById('micButton');
 
 const localVideo = document.getElementById('localVideo');
 const remoteVideo = document.getElementById('remoteVideo');
-const remoteAudio = document.getElementById('remoteAudio');
 
 
 let pc;
@@ -91,11 +92,6 @@ signaling.onmessage = e => {
 };
 
 startButton.onclick = async () => {
-  /*meetingId = document.getElementById('meetingId').value;
-  if (!meetingId) {
-    alert("Set meetingId")
-    return
-  }*/
 
   localStream = await navigator.mediaDevices.getUserMedia({audio: true, video: true});
   
@@ -113,6 +109,30 @@ hangupButton.onclick = async () => {
   signalEvent({head: {meetingId: meetingId}, body: {type: 'bye'}})
   window.location = "lobby.html"
 };
+
+cameraButton.onclick = async () => {
+  let videoTrack = localStream.getTracks().find(track => track.kind === 'video')
+
+  if(videoTrack.enabled){
+      videoTrack.enabled = false
+      document.getElementById('cameraButton').style.backgroundColor = 'rgb(255, 80, 80)'
+  }else{
+      videoTrack.enabled = true
+      document.getElementById('cameraButton').style.backgroundColor = 'rgb(179, 102, 249, .9)'
+  }
+}
+
+micButton.onclick = async () => {
+  let audioTrack = localStream.getTracks().find(track => track.kind === 'audio')
+
+  if(audioTrack.enabled){
+      audioTrack.enabled = false
+      document.getElementById('micButton').style.backgroundColor = 'rgb(255, 80, 80)'
+  }else{
+      audioTrack.enabled = true
+      document.getElementById('micButton').style.backgroundColor = 'rgb(179, 102, 249, .9)'
+  }
+}
 
 async function hangup() {
   if (pc) {
@@ -142,7 +162,6 @@ function createPeerConnection() {
   };
   pc.ontrack = e => {
     remoteVideo.srcObject = e.streams[0];
-    //remoteAudio.srcObject = e.streams[1];
   }
   localStream.getTracks().forEach(track => pc.addTrack(track, localStream));
 }
