@@ -10,41 +10,38 @@
 <head>
 
     <meta charset="utf-8">
-    <meta name="description" content="WebRTC code samples">
-    <meta name="viewport" content="width=device-width, user-scalable=yes, initial-scale=1, maximum-scale=1">
+    <meta http-equiv='X-UA-Compatible' content='IE=edge'>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="mobile-web-app-capable" content="yes">
-    <meta id="theme-color" name="theme-color" content="#ffffff">
-
     <title>MyPeer</title>
     <link rel="stylesheet" href="css/main.css"/>
 </head>
 
 <body>
 
+<div class="center-header">
+    <h1><span>MyPeer</span></h1>
+</div>
 
 <div class="center-box">
 
     <div id="videos">
-
-        <h1><span>MyPeer connection</span></h1>
-
         <div class="video-player">
-            <video id="localVideo" playsinline autoplay></video>
+            <video id="localVideo" autoplay playsinline></video>
         </div>
 
         <div class="video-player">
-            <video id="remoteVideo" playsinline autoplay></video>
+            <video id="remoteVideo" autoplay playsinline></video>
         </div>
 
-        <div class="center-button">
-            <button id="startButton">Join Now</button>
-        </div>
-        
-    
     </div>   
+
 </div>
 
 <div id="controls">
+    <div class="control-container" id="cameraButton">
+        <button id="startButton">Join Now</button>
+    </div>
 
     <div class="control-container" id="cameraButton">
         <img src="icons/camera.png" />

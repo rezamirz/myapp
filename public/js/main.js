@@ -12,7 +12,7 @@ let queryString = window.location.search
 let urlParams = new URLSearchParams(queryString)
 let meetingId = urlParams.get('room')
 
-if(!meetingId){
+if (!meetingId) {
     window.location = 'lobby.html'
 }
 

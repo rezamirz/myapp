@@ -5,6 +5,13 @@
  *  that can be found in the LICENSE file in the root of the source
  *  tree.
  */
+
+html {
+  /* avoid annoying page width change
+  when moving from the home page */
+  overflow-y: scroll;
+}
+
 .hidden {
   display: none;
 }
@@ -30,7 +37,7 @@ body {
 }
 
 button {
-  background-color: #d84a38;
+  background-color: rgb(179, 102, 249, .9);
   border: none;
   border-radius: 2px;
   color: white;
@@ -68,12 +75,6 @@ h1 {
   font-weight: 500;
   margin: 0 0 0.8em 0;
   padding: 0 0 0.2em 0;
-}
-
-html {
-  /* avoid annoying page width change
-  when moving from the home page */
-  overflow-y: scroll;
 }
 
 img {
@@ -142,6 +143,7 @@ textarea {
   font-family: 'Roboto', sans-serif;
 }
 
+
 #controls{
   position: fixed;
   bottom: 20px;
@@ -172,11 +174,20 @@ textarea {
   position: fixed;
   transform:translateX(-50%);
   display: flex;
+  overflow-y: scroll;
 }
 
 .center-button {
   display: grid;
   justify-content: center;
+  align-items: center;
+}
+
+.center-header {
+  display: grid;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
   align-items: center;
 }
 
@@ -186,18 +197,17 @@ textarea {
 
 #videos{
   display: grid;
-  grid-template-columns: 1fr;
-  width: 400px;
-  height: 700px;
+  grid-template-columns: 1fr 1fr;
+  width: 1300px;
+  height: 500px;
   overflow:hidden;
   gap: 4px;
 }
 
 .video-player{
   background-color: black;
-  width: 100%;
-  height: 100%;
+  width: 600px;
+  height: 480px;
   object-fit: cover;
 }
-
 
