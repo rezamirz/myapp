@@ -191,10 +191,6 @@ textarea {
   align-items: center;
 }
 
-#leaveButton{
-  background-color: rgb(255,80,80, 1);
-}
-
 #videos{
   display: grid;
   grid-template-columns: 1fr 1fr;

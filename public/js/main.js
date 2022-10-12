@@ -16,9 +16,7 @@ if (!meetingId) {
     window.location = 'lobby.html'
 }
 
-const startButton = document.getElementById('startButton');
 const hangupButton = document.getElementById('leaveButton');
-hangupButton.disabled = true;
 const cameraButton = document.getElementById('cameraButton');
 const micButton = document.getElementById('micButton');
 
@@ -30,6 +28,7 @@ let pc;
 let localStream;
 let version = 2;
 let signaling;
+let connected = false;
 
 const servers = {
   iceServers: [
@@ -91,23 +90,22 @@ signaling.onmessage = e => {
   }
 };
 
-startButton.onclick = async () => {
-
-  localStream = await navigator.mediaDevices.getUserMedia({audio: true, video: true});
-  
-  localVideo.muted = true;
-  localVideo.srcObject = localStream;
-
-  startButton.disabled = true;
-  hangupButton.disabled = false;
-
-  signalEvent({head: {meetingId: meetingId}, body: {type: 'ready'}})
-};
-
 hangupButton.onclick = async () => {
-  hangup();
-  signalEvent({head: {meetingId: meetingId}, body: {type: 'bye'}})
-  window.location = "lobby.html"
+  if (!connected) {
+    localStream = await navigator.mediaDevices.getUserMedia({audio: true, video: true});
+  
+    localVideo.muted = true;
+    localVideo.srcObject = localStream;
+
+    signalEvent({head: {meetingId: meetingId}, body: {type: 'ready'}})
+    connected = true;
+    document.getElementById('leaveButton').style.backgroundColor = 'rgb(255,80,80)';
+  } else {
+    hangup();
+    signalEvent({head: {meetingId: meetingId}, body: {type: 'bye'}})
+    window.location = "lobby.html"
+    connected = false
+  }
 };
 
 cameraButton.onclick = async () => {
@@ -141,9 +139,7 @@ async function hangup() {
   }
   localStream.getTracks().forEach(track => track.stop());
   localStream = null;
-  startButton.disabled = false;
-  hangupButton.disabled = true;
-};
+}
 
 function createPeerConnection() {
   pc = new RTCPeerConnection(servers);
